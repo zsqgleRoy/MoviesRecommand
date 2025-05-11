@@ -1,0 +1,144 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.Royhang</groupId>
+    <artifactId>movie-recommendation-system</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <!-- 更新 Java 版本为 17（与日志中的运行环境一致） -->
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <scala.version>2.12.18</scala.version>
+        <spark.version>3.5.0</spark.version>
+        <akka.http.version>10.1.15</akka.http.version>
+        <akka.actor.version>2.5.32</akka.actor.version>
+        <akka.cors.version>1.2.0</akka.cors.version>
+        <logback.version>1.5.13</logback.version>
+    </properties>
+
+    <dependencies>
+        <!-- Scala 依赖 -->
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>${scala.version}</version>
+        </dependency>
+
+        <!-- Spark 依赖（排除冲突的 Log4j2） -->
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-core_2.12</artifactId>
+            <version>${spark.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-slf4j2-impl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-mllib_2.12</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql_2.12</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
+
+        <!-- MySQL 驱动 -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.28</version>
+        </dependency>
+
+        <!-- Akka 依赖 -->
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-http_2.12</artifactId>
+            <version>${akka.http.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-http-spray-json_2.12</artifactId>
+            <version>${akka.http.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-actor_2.12</artifactId>
+            <version>${akka.actor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-stream_2.12</artifactId>
+            <version>${akka.actor.version}</version>
+        </dependency>
+
+        <!-- CORS 支持 -->
+        <dependency>
+            <groupId>ch.megard</groupId>
+            <artifactId>akka-http-cors_2.12</artifactId>
+            <version>${akka.cors.version}</version>
+        </dependency>
+
+        <!-- 日志依赖（使用 Logback 替代 Log4j2） -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <sourceDirectory>src/main/scala</sourceDirectory>
+        <testSourceDirectory>src/test/scala</testSourceDirectory>
+        <plugins>
+            <!-- Scala 编译插件 -->
+            <plugin>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+                <version>4.8.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 打包插件（修正主类名称） -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <!-- 修正主类为 RecommendationServer -->
+                                    <mainClass>com.Royhang.RecommendationServer</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
